@@ -13,7 +13,7 @@ function App() {
     },
     {
       id: 2,
-      name: "Ines Oliveros",
+      name: "Inès Oliveros",
       role: "Backend Developer",
       img: "https://bootdey.com/img/Content/avatar/avatar3.png"
     },
