@@ -18,6 +18,10 @@ export const People = ({people, setPeople}) => {
     }
   );
 
+  //Estado para eliminar la persona del array
+  const [personToDelete, setPersonToDelete] = useState (null);
+
+
   //Metodo para gestionar los campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,7 +48,50 @@ export const People = ({people, setPeople}) => {
     const personToEdit = people.find(person => person.id === id); //coincidencia exacta mismo valor y tipo de dato
     
     setEditedPerson({...personToEdit});
-};
+  };
+
+  //Metodo para guardar los cambios despuès de editar a una persona
+
+  const handleSave = (e) => {
+    //Prevenir recarga automatica del navegador
+    e.preventDefault();
+    //recorre el arreglo y si encuentra la persona lo guarda en updatePeople y sino la guarda en editedPerson (devulve el objeto)
+    const updatePeople = people.map(person => person.id === editingId ? editedPerson : person)
+    
+    //Actualizar el estado de personas con el array actualizado
+    setPeople(updatePeople);
+
+    setIsEditing(false);
+    setEditingId(null);
+    setEditedPerson({
+        name: '',
+        role: '',
+        img: ''
+    });
+
+  };
+
+  //Metodos para eliminar una persona del array
+
+  //Metodo #1: guarda el id de la persona a eliminar
+
+  const handleDelete = (id) => {
+    setPersonToDelete(id);
+  };
+
+  //Metodo #2: Confirmar la eliminaciòn
+  const confirmDelete = () => {
+    // Filtra el array de personas, eliminando la persona que coincide con el id
+    setPeople(people.filter(person => person.id !== personToDelete ));
+    setPersonToDelete(null);
+  };
+  //Metodo #3: Confirmar la eliminaciòn con un modal
+  const cancelDelete = () => {
+    setPersonToDelete(null);
+  };
+
+
+
 
   return (
     <div>
@@ -61,6 +108,9 @@ export const People = ({people, setPeople}) => {
                                     img={people.img}
                                     role={people.role}
                                     handleEdit={() => handleEdit(people.id)}
+                                    handleDelete={handleDelete}
+                                    // handleDelete={() => handleDelete(people.id)}
+                                    
                                 />
                             </div>
                         );
@@ -70,7 +120,7 @@ export const People = ({people, setPeople}) => {
         </div>
         {/* Se crea el formulario  */}
         <div className="container">
-            <h2 className="text-center mt-4">Crear Nuevo Empleado</h2>
+            <h2 className="text-center mt-4">{isEditing ? 'Actualizar Empleado':'Crear Nuevo Empleado'}</h2>
             <form action="">
                 <div>
                     <label htmlFor="name">Nombres</label>
@@ -88,9 +138,29 @@ export const People = ({people, setPeople}) => {
                     <input type="text" name="img" value={editedPerson.img} onChange={handleChange} required className="form-control"/>
                 </div>
                 <div className="mt-2 text-center">
-                    <button type="submit" className="btn btn-primary">Modificar</button>
+                    <button type="submit" className="btn btn-primary" onClick={isEditing? handleSave:handleCreate}>{isEditing? 'Actualizar':'Crear'}</button>
                 </div>
             </form>
+        </div>
+        {/* Modal de confirmaciòn para eliminar */}
+        <div id="deleteModal" className="modal fade" tabIndex="-1">
+            <div className="modal-dialog">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h4 className="modal-title">Confirmar Eliminaciòn</h4>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" onClick={cancelDelete}></button>
+                    </div>
+                    <div className="modal-body">
+                        {/* ?.name}? Se agrega ? antes cuando el valor puede ser indefinido y no quiero que salga error */}
+                        <p>¿Estas seguro de eliminar a {people.find(person => person.id === personToDelete)?.name}?</p> 
+                    </div>
+                    <div className="modal-footer">
+                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" onClick={cancelDelete}>Cancelar</button>
+                        <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={confirmDelete}>Eliminar</button>
+                        
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
   )
